@@ -1,4 +1,4 @@
-# 🛠️ EngTech Nexus LMS 
+# 🛠️ Nexus LMS 
 **A Comprehensive Management System for Engineering Technology Batches**
 
 EngTech Nexus is a bespoke LMS platform tailored for managing student progress, lesson delivery, and administrative oversight for A/L Engineering Technology classes.
