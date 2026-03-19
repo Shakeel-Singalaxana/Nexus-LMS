@@ -14,7 +14,7 @@ $is_subfolder = in_array($current_dir, ['admin', 'student', 'auth', 'includes'])
 $prefix = $is_subfolder ? '../' : './';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="<?php echo $_SESSION['theme'] ?? 'light'; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,19 +28,31 @@ $prefix = $is_subfolder ? '../' : './';
 </head>
 <body class="bg-light">
 
+<!-- Global Theme Toggle (Top Right) -->
+<div class="theme-switch-wrapper fixed-top-right">
+    <label class="theme-switch" for="themeCheckbox">
+        <input type="checkbox" id="themeCheckbox" <?php echo ($_SESSION['theme'] ?? 'light') === 'dark' ? 'checked' : ''; ?> />
+        <div class="slider"></div>
+    </label>
+    <i class="bi bi-moon-stars-fill ms-2 theme-icon"></i>
+</div>
+
 <?php if ($is_logged_in): ?>
     <!-- Sidebar Toggle (Mobile) -->
     <div class="d-lg-none p-3 bg-white border-bottom fixed-top shadow-sm d-flex justify-content-between align-items-center">
         <button class="btn btn-outline-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
             <i class="bi bi-list"></i> Menu
         </button>
-        <span class="h5 mb-0 fw-bold text-primary">LMS PORTAL</span>
+        <span class="h5 mb-0 fw-bold text-primary">Nexus-LMS</span>
     </div>
 
     <!-- Sidebar for Desktop -->
     <div id="sidebar" class="d-none d-lg-flex flex-column p-0">
-        <div class="p-4 mb-3 border-bottom border-white border-opacity-10 text-center">
-            <h4 class="fw-bold mb-0 text-white">LMS <span class="badge bg-primary fs-7">2.2</span></h4>
+        <div class="sidebar-header p-4 d-flex align-items-center">
+            <div class="bg-primary p-2 rounded-3 me-2 shadow-sm">
+                <i class="bi bi-grid-fill text-white h5 mb-0"></i>
+            </div>
+            <h4 class="mb-0 fw-bold text-white">Nexus-LMS <span class="badge bg-info-subtle text-info fw-normal" style="font-size: 0.6rem;">v2.3</span></h4>
         </div>
         <nav class="nav flex-column mb-auto">
             <?php if ($user_role === 'admin'): ?>
@@ -75,13 +87,19 @@ $prefix = $is_subfolder ? '../' : './';
             <a href="<?php echo $prefix; ?>auth/logout.php" class="btn btn-danger w-100 btn-sm shadow-sm">
                 <i class="bi bi-box-arrow-right me-1"></i> Logout
             </a>
+            <div class="text-center mt-3 border-top border-secondary pt-2">
+                <p class="mb-0 x-small text-white-50">&copy; <?php echo date('Y'); ?> <strong>Nexus-LMS</strong></p>
+                <p class="mb-0 x-small">
+                    <a href="https://github.com/Shakeel-Singalaxana/" target="_blank" class="text-white-50 text-decoration-none">shakbrotech</a>
+                </p>
+            </div>
         </div>
     </div>
 
     <!-- Offcanvas Sidebar for Mobile -->
     <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="sidebarOffcanvas" style="width: 280px;">
-        <div class="offcanvas-header border-bottom border-secondary">
-            <h5 class="offcanvas-title fw-bold">LMS Menu</h5>
+        <div class="offcanvas-header border-bottom border-secondary p-4">
+            <h5 class="offcanvas-title fw-bold">Nexus-LMS <span class="badge bg-primary fs-7 px-2">v2.3</span></h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body p-0 py-3 d-flex flex-column h-100">
@@ -105,8 +123,12 @@ $prefix = $is_subfolder ? '../' : './';
                     </a>
                 <?php endif; ?>
             </nav>
-            <div class="p-4 border-top border-secondary mt-auto">
-                <a href="<?php echo $prefix; ?>auth/logout.php" class="btn btn-outline-danger w-100">Logout</a>
+            <div class="p-4 border-top border-secondary mt-auto text-center">
+                <a href="<?php echo $prefix; ?>auth/logout.php" class="btn btn-outline-danger w-100 mb-3">Logout</a>
+                <p class="mb-0 x-small text-white-50">&copy; <?php echo date('Y'); ?> <strong>Nexus-LMS</strong></p>
+                <p class="mb-0 x-small">
+                    <a href="https://github.com/Shakeel-Singalaxana/" target="_blank" class="text-white-50 text-decoration-none">shakbrotech</a>
+                </p>
             </div>
         </div>
     </div>

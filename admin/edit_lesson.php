@@ -4,6 +4,8 @@ require_once '../config/db.php';
 $active_page = 'admin_lessons';
 $page_title = 'Edit Lesson';
 require_once '../includes/header.php';
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header('Location: ../index.php');
@@ -40,38 +42,29 @@ if (isset($_POST['add_videos'])) {
     }
 }
 
-// 3. Add More Resources (Files)
-if (isset($_POST['add_resources'])) {
-    if (!empty($_FILES['new_files']['name'][0])) {
-        $target_dir = "../uploads/";
-        foreach ($_FILES['new_files']['tmp_name'] as $key => $tmp_name) {
-            $original_name = $_FILES['new_files']['name'][$key];
-            $file_name = time() . '_' . $key . '_' . basename($original_name);
-            $target_file = $target_dir . $file_name;
-            if (move_uploaded_file($tmp_name, $target_file)) {
-                $file_path = "uploads/" . $file_name;
-                $stmt = $pdo->prepare("INSERT INTO lesson_resources (lesson_id, resource_type, file_path, file_name) VALUES (?, 'file', ?, ?)");
-                $stmt->execute([$lesson_id, $file_path, $original_name]);
-            }
-        }
-        $message = "Materials added.";
-    }
-}
+// 3. (REMOVED) Local File uploads are disabled.
 
 // 6. Add More Links
 if (isset($_POST['add_links'])) {
-    $raw = trim($_POST['new_links']);
+    $raw = trim($_POST['new_links'] ?? '');
     if (!empty($raw)) {
-        $links = explode("\n", $raw);
-        foreach ($links as $index => $link) {
-            $link = trim($link);
-            if (!empty($link)) {
-                $name = "Resource Link " . time() . "_" . $index;
-                $stmt = $pdo->prepare("INSERT INTO lesson_resources (lesson_id, resource_type, file_path, file_name) VALUES (?, 'link', ?, ?)");
-                $stmt->execute([$lesson_id, $link, $name]);
+        try {
+            $pdo->beginTransaction();
+            $links = preg_split("/\r\n|\r|\n/", $raw);
+            foreach ($links as $index => $link) {
+                $link = trim($link);
+                if (!empty($link)) {
+                    $name = "Resource " . ($index + 1);
+                    $stmt = $pdo->prepare("INSERT INTO lesson_resources (lesson_id, resource_type, file_path, file_name, display_order) VALUES (?, 'link', ?, ?, ?)");
+                    $stmt->execute([$lesson_id, $link, $name, ($index + 100)]);
+                }
             }
+            $pdo->commit();
+            $message = "Links added successfully.";
+        } catch (Exception $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            $error = "Error adding links: " . $e->getMessage();
         }
-        $message = "Links added.";
     }
 }
 
@@ -121,7 +114,15 @@ $batches = $pdo->query("SELECT * FROM batches ORDER BY name DESC")->fetchAll();
     </div>
 
     <?php if ($message): ?>
-        <div class="alert alert-success shadow-sm"><?php echo $message; ?></div>
+        <div class="alert alert-success shadow-sm border-0 bg-success-subtle text-success p-3 rounded-4 mb-4">
+            <i class="bi bi-check-circle-fill me-2"></i> <?php echo $message; ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($error): ?>
+        <div class="alert alert-danger shadow-sm border-0 bg-danger-subtle text-danger p-3 rounded-4 mb-4">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> <?php echo $error; ?>
+        </div>
     <?php endif; ?>
 
     <div class="row g-4">
@@ -205,18 +206,11 @@ $batches = $pdo->query("SELECT * FROM batches ORDER BY name DESC")->fetchAll();
                 </div>
 
                 <div class="row g-3">
-                    <div class="col-md-6">
-                        <form method="POST" enctype="multipart/form-data" class="h-100 p-3 border rounded">
-                            <label class="form-label small fw-bold">Attach More Files</label>
-                            <input type="file" name="new_files[]" class="form-control mb-3" multiple>
-                            <button type="submit" name="add_resources" class="btn btn-outline-success btn-sm w-100">Upload Files</button>
-                        </form>
-                    </div>
-                    <div class="col-md-6">
+                    <div class="col-12">
                         <form method="POST" class="h-100 p-3 border rounded">
-                            <label class="form-label small fw-bold">Add External Links</label>
-                            <textarea name="new_links" class="form-control mb-3" rows="1" placeholder="Paste links here..."></textarea>
-                            <button type="submit" name="add_links" class="btn btn-outline-primary btn-sm w-100">Add Links</button>
+                            <label class="form-label small fw-bold">Add External Resource Links (One per line)</label>
+                            <textarea name="new_links" class="form-control mb-3" rows="3" placeholder="Paste GDrive, Dropbox, or other links here..."></textarea>
+                            <button type="submit" name="add_links" class="btn btn-primary btn-sm w-100">Add Links</button>
                         </form>
                     </div>
                 </div>

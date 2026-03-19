@@ -52,7 +52,38 @@ function getYouTubeID($url) {
     return $matches[1] ?? null;
 }
 
-// Handle completion
+// Handle video completion
+if (isset($_POST['mark_video_done'])) {
+    $video_id = (int)$_POST['video_id'];
+    $stmt = $pdo->prepare("INSERT IGNORE INTO video_progress (user_id, video_id) VALUES (?, ?)");
+    $stmt->execute([$user_id, $video_id]);
+    
+    // Optional: Check if all videos in this lesson are completed and mark lesson as completed
+    $stmt = $pdo->prepare("SELECT id FROM lesson_videos WHERE lesson_id = ?");
+    $stmt->execute([$lesson_id]);
+    $all_vids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    
+    if (!empty($all_vids)) {
+        $stmt = $pdo->prepare("SELECT video_id FROM video_progress WHERE user_id = ? AND video_id IN (" . implode(',', array_fill(0, count($all_vids), '?')) . ")");
+        $stmt->execute(array_merge([$user_id], $all_vids));
+        $watched_vids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        
+        if (count($watched_vids) === count($all_vids)) {
+            $stmt = $pdo->prepare("INSERT IGNORE INTO progress (user_id, lesson_id) VALUES (?, ?)");
+            $stmt->execute([$user_id, $lesson_id]);
+        }
+    }
+
+    header("Location: lesson_view.php?id=$lesson_id");
+    exit;
+}
+
+// Fetch Completed Videos for this user
+$stmt = $pdo->prepare("SELECT video_id FROM video_progress WHERE user_id = ?");
+$stmt->execute([$user_id]);
+$completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+// Handle lesson completion (manual fallback or automatic if no videos?)
 if (isset($_POST['mark_done'])) {
     $stmt = $pdo->prepare("INSERT IGNORE INTO progress (user_id, lesson_id) VALUES (?, ?)");
     $stmt->execute([$user_id, $lesson_id]);
@@ -111,6 +142,20 @@ if (isset($_POST['mark_done'])) {
                                 <div class="d-flex align-items-center justify-content-center text-white-50">Invalid Video Link</div>
                             <?php endif; ?>
                         </div>
+                        <div class="card-footer bg-white py-3 px-4 text-end border-0">
+                            <?php if (in_array($video['id'], $completed_videos)): ?>
+                                <span class="badge bg-success py-2 px-3 rounded-pill">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Video Completed
+                                </span>
+                            <?php else: ?>
+                                <form method="POST" class="d-inline">
+                                    <input type="hidden" name="video_id" value="<?php echo $video['id']; ?>">
+                                    <button type="submit" name="mark_video_done" class="btn btn-sm btn-outline-primary rounded-pill px-4">
+                                        <i class="bi bi-check2 me-1"></i> Mark as Watched
+                                    </button>
+                                </form>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -141,7 +186,13 @@ if (isset($_POST['mark_done'])) {
                                     <?php echo ($res['resource_type'] == 'link') ? 'External Resource' : htmlspecialchars($res['file_name']); ?>
                                 </h6>
                                 <?php if ($res['resource_type'] == 'link'): ?>
-                                    <a href="<?php echo htmlspecialchars($res['file_path']); ?>" target="_blank" class="btn btn-sm btn-primary px-3 rounded-pill">
+                                    <?php 
+                                        $url = $res['file_path'];
+                                        if (!preg_match("~^(?:f|ht)tps?://~i", $url)) {
+                                            $url = "http://" . $url;
+                                        }
+                                    ?>
+                                    <a href="<?php echo htmlspecialchars($url); ?>" target="_blank" class="btn btn-sm btn-primary px-3 rounded-pill shadow-sm">
                                         <i class="bi bi-box-arrow-up-right me-1"></i> Open Link
                                     </a>
                                 <?php else: ?>

@@ -53,29 +53,55 @@ if ($is_verified && $batch_id) {
         SELECT l.*, 
                (SELECT COUNT(*) FROM progress p WHERE p.lesson_id = l.id AND p.user_id = ?) as is_completed,
                (SELECT COUNT(*) FROM lesson_videos lv WHERE lv.lesson_id = l.id) as video_count,
+               (SELECT COUNT(*) FROM video_progress vp JOIN lesson_videos lv ON vp.video_id = lv.id WHERE lv.lesson_id = l.id AND vp.user_id = ?) as watched_count,
                (SELECT COUNT(*) FROM lesson_resources lr WHERE lr.lesson_id = l.id) as file_count
         FROM lessons l 
         WHERE l.batch_id = ? AND l.class_type = ? 
         ORDER BY l.created_at DESC
     ");
-    $stmt->execute([$user_id, $batch_id, $active_type]);
+    $stmt->execute([$user_id, $user_id, $batch_id, $active_type]);
     $lessons = $stmt->fetchAll();
 
-    // Calculate progress for each type
+    // Calculate progress for each type based on video counts
     foreach ($class_types as $type) {
-        $stmt_total = $pdo->prepare("SELECT COUNT(*) FROM lessons WHERE batch_id = ? AND class_type = ?");
+        // Total videos in this category for this batch
+        $stmt_total = $pdo->prepare("
+            SELECT COUNT(*) FROM lesson_videos lv 
+            JOIN lessons l ON lv.lesson_id = l.id 
+            WHERE l.batch_id = ? AND l.class_type = ?
+        ");
         $stmt_total->execute([$batch_id, $type]);
-        $total = $stmt_total->fetchColumn();
+        $total_videos = $stmt_total->fetchColumn();
 
+        // Watched videos in this category
         $stmt_comp = $pdo->prepare("
-            SELECT COUNT(*) FROM progress p 
-            JOIN lessons l ON p.lesson_id = l.id 
-            WHERE p.user_id = ? AND l.batch_id = ? AND l.class_type = ?
+            SELECT COUNT(*) FROM video_progress vp 
+            JOIN lesson_videos lv ON vp.video_id = lv.id 
+            JOIN lessons l ON lv.lesson_id = l.id 
+            WHERE vp.user_id = ? AND l.batch_id = ? AND l.class_type = ?
         ");
         $stmt_comp->execute([$user_id, $batch_id, $type]);
-        $completed = $stmt_comp->fetchColumn();
+        $watched_videos = $stmt_comp->fetchColumn();
 
-        $progress_stats[$type] = ($total > 0) ? round(($completed / $total) * 100) : 0;
+        // If no videos, fallback to lesson-based progress (optional but good for UX)
+        if ($total_videos > 0) {
+            $progress_stats[$type] = round(($watched_videos / $total_videos) * 100);
+        } else {
+            // Fallback: Use lesson completion if no videos exist
+            $stmt_lessons = $pdo->prepare("SELECT COUNT(*) FROM lessons WHERE batch_id = ? AND class_type = ?");
+            $stmt_lessons->execute([$batch_id, $type]);
+            $total_l = $stmt_lessons->fetchColumn();
+            
+            $stmt_comp_l = $pdo->prepare("
+                SELECT COUNT(*) FROM progress p 
+                JOIN lessons l ON p.lesson_id = l.id 
+                WHERE p.user_id = ? AND l.batch_id = ? AND l.class_type = ?
+            ");
+            $stmt_comp_l->execute([$user_id, $batch_id, $type]);
+            $comp_l = $stmt_comp_l->fetchColumn();
+            
+            $progress_stats[$type] = ($total_l > 0) ? round(($comp_l / $total_l) * 100) : 0;
+        }
     }
 }
 
@@ -212,8 +238,8 @@ function getYouTubeID($url) {
                                 <div class="row g-2 mb-4">
                                     <div class="col-6">
                                         <div class="p-2 bg-danger-subtle text-danger rounded text-center">
-                                            <div class="h4 mb-0"><?php echo $lesson['video_count']; ?></div>
-                                            <div class="small fw-bold">Videos</div>
+                                            <div class="h4 mb-0"><?php echo $lesson['watched_count']; ?>/<?php echo $lesson['video_count']; ?></div>
+                                            <div class="small fw-bold">Watched</div>
                                         </div>
                                     </div>
                                     <div class="col-6">

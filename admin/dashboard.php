@@ -86,6 +86,9 @@ $students = $pdo->query("
             <p class="text-muted">Manage user verification, batch assignment, and account security.</p>
         </div>
         <div class="col-md-6 text-md-end">
+            <a href="export_students.php" class="btn btn-outline-success me-2">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export Student CSV
+            </a>
             <span class="badge bg-secondary p-2 px-3">Total Students: <?php echo count($students); ?></span>
         </div>
     </div>
@@ -104,13 +107,22 @@ $students = $pdo->query("
         </div>
     <?php endif; ?>
 
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="search-container shadow-sm border rounded-pill overflow-hidden bg-white">
+                <i class="bi bi-search h5 mb-0 opacity-50"></i>
+                <input type="text" id="studentSearch" class="form-control border-0 ps-5 py-3" placeholder="Search student by name or mobile number...">
+            </div>
+        </div>
+    </div>
+
     <div class="card glass-card border-0 overflow-hidden shadow-sm">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
                         <th class="ps-4">Student Name</th>
-                        <th>Username</th>
+                        <th>Mobile Number</th>
                         <th>Batch</th>
                         <th>Status</th>
                         <th class="text-end pe-4">Actions</th>
@@ -126,7 +138,7 @@ $students = $pdo->query("
                                     <div class="fw-bold"><?php echo htmlspecialchars($student['full_name']); ?></div>
                                     <small class="text-muted">Registered: <?php echo date('Y-m-d', strtotime($student['created_at'])); ?></small>
                                 </td>
-                                <td><code><?php echo htmlspecialchars($student['username']); ?></code></td>
+                                <td><code><?php echo htmlspecialchars($student['mobile_number']); ?></code></td>
                                 <td>
                                     <?php if ($student['batch_name']): ?>
                                         <span class="badge bg-info-subtle text-info border border-info shadow-none"><?php echo htmlspecialchars($student['batch_name']); ?></span>
@@ -223,6 +235,40 @@ $students = $pdo->query("
 <?php endif; ?>
 
 <script>
+// Student Search Logic
+document.getElementById('studentSearch').addEventListener('keyup', function(e) {
+    const term = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('tbody tr:not(.empty-row)');
+    
+    rows.forEach(row => {
+        const name = row.cells[0].textContent.toLowerCase();
+        const mobile = row.cells[1].textContent.toLowerCase();
+        
+        if (name.includes(term) || mobile.includes(term)) {
+            row.classList.remove('d-none');
+        } else {
+            row.classList.add('d-none');
+        }
+    });
+
+    // Check if any rows are visible
+    const visibleRows = Array.from(rows).filter(r => !r.classList.contains('d-none'));
+    const tBody = document.querySelector('tbody');
+    let emptyMsg = document.getElementById('searchEmptyMsg');
+    
+    if (visibleRows.length === 0 && rows.length > 0) {
+        if (!emptyMsg) {
+            emptyMsg = document.createElement('tr');
+            emptyMsg.id = 'searchEmptyMsg';
+            emptyMsg.classList.add('empty-row');
+            emptyMsg.innerHTML = '<td colspan="5" class="text-center py-5 text-muted">No students matching your search.</td>';
+            tBody.appendChild(emptyMsg);
+        }
+    } else if (emptyMsg) {
+        emptyMsg.remove();
+    }
+});
+
 // Prevent form double submission
 if ( window.history.replaceState ) {
     window.history.replaceState( null, null, window.location.href );

@@ -37,8 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $lesson_id = $pdo->lastInsertId();
             
             // 2. Insert videos
+            $youtube_urls_raw = trim($_POST['youtube_urls'] ?? '');
             if (!empty($youtube_urls_raw)) {
-                $urls = explode("\n", $youtube_urls_raw);
+                $urls = preg_split("/\r\n|\r|\n/", $youtube_urls_raw);
                 foreach ($urls as $index => $url) {
                     $url = trim($url);
                     if (!empty($url)) {
@@ -49,34 +50,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // 3. Insert external links
-            $external_links = trim($_POST['external_links'] ?? '');
-            if (!empty($external_links)) {
-                $links = explode("\n", $external_links);
+            $external_links_raw = trim($_POST['external_links'] ?? '');
+            if (!empty($external_links_raw)) {
+                $links = preg_split("/\r\n|\r|\n/", $external_links_raw);
                 foreach ($links as $index => $link) {
                     $link = trim($link);
                     if (!empty($link)) {
-                        $name = "Resource Link " . ($index + 1);
+                        $name = "Resource" . ($index + 1);
                         $stmt = $pdo->prepare("INSERT INTO lesson_resources (lesson_id, resource_type, file_path, file_name, display_order) VALUES (?, 'link', ?, ?, ?)");
-                        $stmt->execute([$lesson_id, $link, $name, ($index + 100)]); // Using offset to keep links separate if needed
-                    }
-                }
-            }
-            
-            // 4. Insert local files
-            if (!empty($_FILES['lesson_files']['name'][0])) {
-                $target_dir = "../uploads/";
-                foreach ($_FILES['lesson_files']['tmp_name'] as $key => $tmp_name) {
-                    $original_name = $_FILES['lesson_files']['name'][$key];
-                    $file_name = time() . '_' . $key . '_' . basename($original_name);
-                    $target_file = $target_dir . $file_name;
-                    $file_type = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-
-                    if (in_array($file_type, ["pdf", "png", "jpg", "jpeg"])) {
-                        if (move_uploaded_file($tmp_name, $target_file)) {
-                            $file_path = "uploads/" . $file_name;
-                            $stmt = $pdo->prepare("INSERT INTO lesson_resources (lesson_id, resource_type, file_path, file_name, display_order) VALUES (?, 'file', ?, ?, ?)");
-                            $stmt->execute([$lesson_id, $file_path, $original_name, ($key + 200)]);
-                        }
+                        $stmt->execute([$lesson_id, $link, $name, ($index + 100)]);
                     }
                 }
             }
@@ -253,11 +235,7 @@ $lessons = $pdo->query("
                         </div>
                         <div class="col-12">
                             <label class="form-label small fw-bold">External Resource Links (GDrive, Dropbox, etc. - One per line)</label>
-                            <textarea name="external_links" class="form-control" rows="3" placeholder="Paste external links here..."></textarea>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label small fw-bold">Local Files (Multiple PDFs/Images)</label>
-                            <input type="file" name="lesson_files[]" class="form-control" accept=".pdf,.png,.jpg,.jpeg" multiple>
+                            <textarea name="external_links" class="form-control" rows="5" placeholder="Paste external links here..."></textarea>
                         </div>
                     </div>
                 </div>

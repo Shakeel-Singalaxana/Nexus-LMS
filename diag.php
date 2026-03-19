@@ -16,7 +16,7 @@ try {
     echo "\nBatches content:\n";
     print_r($batches);
 
-    $students = $pdo->query("SELECT id, username, role, batch_id FROM users WHERE role = 'student'")->fetchAll();
+    $students = $pdo->query("SELECT id, mobile_number, role, batch_id FROM users WHERE role = 'student'")->fetchAll();
     echo "\nStudents content:\n";
     print_r($students);
 

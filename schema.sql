@@ -15,13 +15,14 @@ CREATE TABLE IF NOT EXISTS batches (
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
-    username VARCHAR(50) NOT NULL UNIQUE,
+    mobile_number VARCHAR(20) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role ENUM('admin', 'student') DEFAULT 'student',
     is_verified BOOLEAN DEFAULT FALSE,
     is_first_login BOOLEAN DEFAULT TRUE,
     batch_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    theme VARCHAR(10) DEFAULT 'light',
     FOREIGN KEY (batch_id) REFERENCES batches(id) ON DELETE SET NULL
 );
 
@@ -64,6 +65,17 @@ CREATE TABLE IF NOT EXISTS progress (
     UNIQUE KEY (user_id, lesson_id),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE
+);
+
+-- Video-level progress tracking
+CREATE TABLE IF NOT EXISTS video_progress (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    video_id INT NOT NULL,
+    watched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY (user_id, video_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (video_id) REFERENCES lesson_videos(id) ON DELETE CASCADE
 );
 
 -- Announcements / Banner messages
