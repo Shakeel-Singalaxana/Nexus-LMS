@@ -1,7 +1,11 @@
 <?php
 // auth/change_password.php
 require_once '../config/db.php';
-require_once '../includes/header.php';
+
+// Start session manually if not already started to check login BEFORE header
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../index.php');
@@ -10,10 +14,11 @@ if (!isset($_SESSION['user_id'])) {
 
 $error = '';
 $success = '';
+$redirect_now = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $new_password = $_POST['new_password'];
-    $confirm_password = $_POST['confirm_password'];
+    $new_password = $_POST['new_password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
 
     if (empty($new_password) || strlen($new_password) < 6) {
         $error = 'Password must be at least 6 characters long.';
@@ -27,12 +32,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmt->execute([$hashed_password, $user_id])) {
             $_SESSION['is_first_login'] = 0;
             $success = 'Password successfully updated! Redirecting to your dashboard...';
-            header("refresh:2; url=../student/dashboard.php");
+            $redirect_now = true;
         } else {
             $error = 'Something went wrong. Please try again.';
         }
     }
 }
+
+require_once '../includes/header.php';
 ?>
 
 <div class="container py-5">
@@ -57,6 +64,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="alert alert-success mb-4">
                         <i class="bi bi-check-circle me-2"></i> <?php echo $success; ?>
                     </div>
+                    <script>
+                        setTimeout(function() {
+                            window.location.href = '../student/dashboard.php';
+                        }, 2000);
+                    </script>
                 <?php endif; ?>
 
                 <form method="POST">

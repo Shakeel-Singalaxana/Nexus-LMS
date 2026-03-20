@@ -1,9 +1,11 @@
 <?php
 // student/lesson_view.php
 require_once '../config/db.php';
-$active_page = 'student_dashboard';
-$page_title = 'Lesson View';
-require_once '../includes/header.php';
+
+// Start session manually if not already started to check login BEFORE header
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Check if user is student
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'student') {
@@ -18,6 +20,45 @@ if (!$lesson_id) {
 }
 
 $user_id = $_SESSION['user_id'];
+
+// Handle video completion (BEFORE HEADER)
+if (isset($_POST['mark_video_done'])) {
+    $video_id = (int)$_POST['video_id'];
+    $stmt = $pdo->prepare("INSERT IGNORE INTO video_progress (user_id, video_id) VALUES (?, ?)");
+    $stmt->execute([$user_id, $video_id]);
+    
+    // Optional: Check if all videos in this lesson are completed and mark lesson as completed
+    $stmt = $pdo->prepare("SELECT id FROM lesson_videos WHERE lesson_id = ?");
+    $stmt->execute([$lesson_id]);
+    $all_vids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    
+    if (!empty($all_vids)) {
+        $stmt = $pdo->prepare("SELECT video_id FROM video_progress WHERE user_id = ? AND video_id IN (" . implode(',', array_fill(0, count($all_vids), '?')) . ")");
+        $stmt->execute(array_merge([$user_id], $all_vids));
+        $watched_vids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        
+        if (count($watched_vids) === count($all_vids)) {
+            $stmt = $pdo->prepare("INSERT IGNORE INTO progress (user_id, lesson_id) VALUES (?, ?)");
+            $stmt->execute([$user_id, $lesson_id]);
+        }
+    }
+
+    header("Location: lesson_view.php?id=$lesson_id");
+    exit;
+}
+
+// Handle lesson completion (BEFORE HEADER)
+if (isset($_POST['mark_done'])) {
+    $stmt = $pdo->prepare("INSERT IGNORE INTO progress (user_id, lesson_id) VALUES (?, ?)");
+    $stmt->execute([$user_id, $lesson_id]);
+    header("Location: lesson_view.php?id=$lesson_id");
+    exit;
+}
+
+// Now include header and set titles
+$active_page = 'student_dashboard';
+$page_title = 'Lesson View';
+require_once '../includes/header.php';
 
 // Fetch Lesson details
 $stmt = $pdo->prepare("
@@ -52,44 +93,10 @@ function getYouTubeID($url) {
     return $matches[1] ?? null;
 }
 
-// Handle video completion
-if (isset($_POST['mark_video_done'])) {
-    $video_id = (int)$_POST['video_id'];
-    $stmt = $pdo->prepare("INSERT IGNORE INTO video_progress (user_id, video_id) VALUES (?, ?)");
-    $stmt->execute([$user_id, $video_id]);
-    
-    // Optional: Check if all videos in this lesson are completed and mark lesson as completed
-    $stmt = $pdo->prepare("SELECT id FROM lesson_videos WHERE lesson_id = ?");
-    $stmt->execute([$lesson_id]);
-    $all_vids = $stmt->fetchAll(PDO::FETCH_COLUMN);
-    
-    if (!empty($all_vids)) {
-        $stmt = $pdo->prepare("SELECT video_id FROM video_progress WHERE user_id = ? AND video_id IN (" . implode(',', array_fill(0, count($all_vids), '?')) . ")");
-        $stmt->execute(array_merge([$user_id], $all_vids));
-        $watched_vids = $stmt->fetchAll(PDO::FETCH_COLUMN);
-        
-        if (count($watched_vids) === count($all_vids)) {
-            $stmt = $pdo->prepare("INSERT IGNORE INTO progress (user_id, lesson_id) VALUES (?, ?)");
-            $stmt->execute([$user_id, $lesson_id]);
-        }
-    }
-
-    header("Location: lesson_view.php?id=$lesson_id");
-    exit;
-}
-
 // Fetch Completed Videos for this user
 $stmt = $pdo->prepare("SELECT video_id FROM video_progress WHERE user_id = ?");
 $stmt->execute([$user_id]);
 $completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-// Handle lesson completion (manual fallback or automatic if no videos?)
-if (isset($_POST['mark_done'])) {
-    $stmt = $pdo->prepare("INSERT IGNORE INTO progress (user_id, lesson_id) VALUES (?, ?)");
-    $stmt->execute([$user_id, $lesson_id]);
-    header("Location: lesson_view.php?id=$lesson_id");
-    exit;
-}
 ?>
 
 <div class="container py-4">

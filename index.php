@@ -8,71 +8,120 @@ $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['login'])) {
-        $mobile_number = trim($_POST['mobile_number']);
-        $password = $_POST['password'];
+        try {
+            $mobile_number = trim($_POST['mobile_number']);
+            $password = $_POST['password'];
 
-        // Check against Admin Credentials first
-        require_once 'config/admin_cfg.php';
-        if ($mobile_number === $admin_username && $password === $admin_password_raw) {
-            // Admin Login Successful
-            $_SESSION['user_id'] = 0; // Admin index 0 or special
-            $_SESSION['username'] = $admin_username;
-            $_SESSION['full_name'] = 'Administrator';
-            $_SESSION['role'] = 'admin';
-            $_SESSION['theme'] = 'light'; // Admin default
-            header('Location: admin/dashboard.php');
-            exit;
-        }
-
-        // Check against Database for Students
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE mobile_number = ?");
-        $stmt->execute([$mobile_number]);
-        $user = $stmt->fetch();
-
-        if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['mobile_number'] = $user['mobile_number'];
-            $_SESSION['full_name'] = $user['full_name'];
-            $_SESSION['role'] = $user['role'];
-            $_SESSION['is_verified'] = $user['is_verified'];
-            $_SESSION['is_first_login'] = $user['is_first_login'];
-            $_SESSION['batch_id'] = $user['batch_id'];
-            $_SESSION['theme'] = $user['theme'] ?? 'light';
-
-            if ($user['is_first_login']) {
-                header('Location: auth/change_password.php');
-            } else {
-                header('Location: student/dashboard.php');
+            // Check against Admin Credentials first
+            require_once 'config/admin_cfg.php';
+            if ($mobile_number === $admin_username && $password === $admin_password_raw) {
+                // Admin Login Successful
+                $_SESSION['user_id'] = 0; // Admin index 0 or special
+                $_SESSION['username'] = $admin_username;
+                $_SESSION['full_name'] = 'Administrator';
+                $_SESSION['role'] = 'admin';
+                $_SESSION['theme'] = 'light'; // Admin default
+                header('Location: admin/dashboard.php');
+                exit;
             }
-            exit;
-        } else {
-            $error = 'Invalid mobile number or password.';
+
+            // Validate mobile number format (10 digits starting with 0)
+            if (!preg_match('/^0[0-9]{9}$/', $mobile_number)) {
+                $error = 'Invalid mobile number format. Must be 10 digits starting with 0.';
+            } else {
+                // Check against Database for Students
+                // We use a query that handles both 'mobile_number' and 'username' columns for compatibility
+                // but we prefer 'mobile_number' as requested.
+                try {
+                    $stmt = $pdo->prepare("SELECT * FROM users WHERE mobile_number = ?");
+                    $stmt->execute([$mobile_number]);
+                } catch (PDOException $e) {
+                    // Fallback to 'username' if 'mobile_number' column doesn't exist yet
+                    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+                    $stmt->execute([$mobile_number]);
+                }
+                
+                $user = $stmt->fetch();
+
+                $login_valid = false;
+                if ($user) {
+                    if (!empty($user['password'])) {
+                        if (password_verify($password, $user['password'])) {
+                            $login_valid = true;
+                        }
+                    } elseif ($user['is_first_login']) {
+                        // Allow login without password ONLY for first time users who haven't set one yet
+                        $login_valid = true;
+                    }
+                }
+
+                if ($login_valid) {
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['mobile_number'] = $user['mobile_number'] ?? $user['username'];
+                    $_SESSION['full_name'] = $user['full_name'];
+                    $_SESSION['role'] = $user['role'];
+                    $_SESSION['is_verified'] = $user['is_verified'];
+                    $_SESSION['is_first_login'] = $user['is_first_login'];
+                    $_SESSION['batch_id'] = $user['batch_id'];
+                    $_SESSION['theme'] = $user['theme'] ?? 'light';
+
+                    if ($user['is_first_login']) {
+                        header('Location: auth/change_password.php');
+                    } else {
+                        header('Location: student/dashboard.php');
+                    }
+                    exit;
+                } else {
+                    $error = 'Invalid mobile number or password.';
+                }
+            }
+        } catch (PDOException $e) {
+            $error = 'Login error: ' . $e->getMessage();
         }
     }
 
     if (isset($_POST['signup'])) {
-        $full_name = trim($_POST['full_name']);
-        $mobile_number = trim($_POST['mobile_number']);
-        $password = $_POST['password'];
-        $confirm_password = $_POST['confirm_password'];
+        try {
+            $full_name = trim($_POST['full_name']);
+            $mobile_number = trim($_POST['mobile_number']);
 
-        if ($password !== $confirm_password) {
-            $error = 'Passwords do not match.';
-        } else {
-            // Check if mobile number already exists
-            $stmt = $pdo->prepare("SELECT id FROM users WHERE mobile_number = ?");
-            $stmt->execute([$mobile_number]);
-            if ($stmt->fetch()) {
-                $error = 'Mobile number already registered.';
+            // Validate mobile number format (10 digits starting with 0)
+            if (!preg_match('/^0[0-9]{9}$/', $mobile_number)) {
+                $error = 'Invalid mobile number format. Must be 10 digits starting with 0.';
             } else {
-                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $pdo->prepare("INSERT INTO users (full_name, mobile_number, password, role, is_verified, is_first_login) VALUES (?, ?, ?, 'student', 0, 1)");
-                if ($stmt->execute([$full_name, $mobile_number, $hashed_password])) {
-                    $success = 'Successfully registered! Please login. Your account is pending verification.';
+                // Check if mobile number already exists (checking both columns for compatibility)
+                try {
+                    $stmt = $pdo->prepare("SELECT id FROM users WHERE mobile_number = ?");
+                    $stmt->execute([$mobile_number]);
+                } catch (PDOException $e) {
+                    $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ?");
+                    $stmt->execute([$mobile_number]);
+                }
+
+                if ($stmt->fetch()) {
+                    $error = 'Mobile number already registered.';
                 } else {
-                    $error = 'Something went wrong. Please try again.';
+                    // Register without password
+                    // Using empty string instead of NULL for compatibility with non-migrated databases
+                    // and attempting to use 'mobile_number' column first, then 'username'.
+                    try {
+                        $stmt = $pdo->prepare("INSERT INTO users (full_name, mobile_number, password, role, is_verified, is_first_login) VALUES (?, ?, '', 'student', 0, 1)");
+                        $res = $stmt->execute([$full_name, $mobile_number]);
+                    } catch (PDOException $e) {
+                        // Fallback to 'username' column
+                        $stmt = $pdo->prepare("INSERT INTO users (full_name, username, password, role, is_verified, is_first_login) VALUES (?, ?, '', 'student', 0, 1)");
+                        $res = $stmt->execute([$full_name, $mobile_number]);
+                    }
+
+                    if ($res) {
+                        $success = 'Successfully registered! Please login with your mobile number. Your account is pending verification.';
+                    } else {
+                        $error = 'Something went wrong. Please try again.';
+                    }
                 }
             }
+        } catch (PDOException $e) {
+            $error = 'Registration error: ' . $e->getMessage() . '. Please ensure you have run the latest schema.sql on your host.';
         }
     }
 }
@@ -117,15 +166,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="tab-content" id="pills-tabContent">
                     <!-- Login Form -->
                     <div class="tab-pane fade show active" id="pills-login" role="tabpanel">
-                        <form method="POST">
+                        <form method="POST" id="loginForm">
                             <h4 class="text-center mb-4 fw-bold">Sign In</h4>
                             <div class="mb-3">
                                 <label class="form-label small fw-bold">Mobile Number</label>
-                                <input type="text" name="mobile_number" class="form-control bg-light" placeholder="e.g. 0771234567" required>
+                                <input type="text" name="mobile_number" class="form-control bg-light" placeholder="e.g. 0123456789" maxlength="10" pattern="0[0-9]{9}" required>
+                                <div class="form-text small">10 digits starting with 0</div>
                             </div>
                             <div class="mb-4">
                                 <label class="form-label small fw-bold">Password</label>
-                                <input type="password" name="password" class="form-control bg-light" placeholder="Enter password" required>
+                                <input type="password" name="password" class="form-control bg-light" placeholder="Enter password (leave blank if first time)">
+                                <div class="form-text small">Enter password if already set.</div>
                             </div>
                             <button type="submit" name="login" class="btn btn-primary w-100 py-2 shadow-sm">
                                 <i class="bi bi-box-arrow-in-right me-2"></i> Login
@@ -135,23 +186,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <!-- Signup Form -->
                     <div class="tab-pane fade" id="pills-signup" role="tabpanel">
-                        <form method="POST">
+                        <form method="POST" id="signupForm">
                             <h4 class="text-center mb-4 fw-bold">Register Account</h4>
                             <div class="mb-3">
                                 <label class="form-label small fw-bold">Full Name</label>
                                 <input type="text" name="full_name" class="form-control bg-light" placeholder="e.g. John Doe" required>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold">Mobile Number</label>
-                                <input type="text" name="mobile_number" class="form-control bg-light" placeholder="Enter your mobile number" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold">Password</label>
-                                <input type="password" name="password" class="form-control bg-light" placeholder="Create a password" required>
-                            </div>
                             <div class="mb-4">
-                                <label class="form-label small fw-bold">Confirm Password</label>
-                                <input type="password" name="confirm_password" class="form-control bg-light" placeholder="Repeat your password" required>
+                                <label class="form-label small fw-bold">Mobile Number</label>
+                                <input type="text" name="mobile_number" class="form-control bg-light" placeholder="e.g. 0123456789" maxlength="10" pattern="0[0-9]{9}" required>
+                                <div class="form-text small">10 digits starting with 0. No password required for registration.</div>
                             </div>
                             <button type="submit" name="signup" class="btn btn-outline-primary w-100 py-2">
                                 <i class="bi bi-person-plus me-2"></i> Create Account
@@ -175,5 +219,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </div>
+<script>
+document.querySelectorAll('input[name="mobile_number"]').forEach(input => {
+    input.addEventListener('input', function(e) {
+        // Remove non-digit characters
+        this.value = this.value.replace(/[^0-9]/g, '');
+        // Limit to 10 digits
+        if (this.value.length > 10) {
+            this.value = this.value.slice(0, 10);
+        }
+    });
+});
+</script>
 
 <?php require_once 'includes/footer.php'; ?>

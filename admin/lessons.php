@@ -97,16 +97,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Fetch Batches for dropdown
 $batches = $pdo->query("SELECT * FROM batches ORDER BY name DESC")->fetchAll();
 
+// Handle Filters
+$filter_batch_id = $_GET['batch_id'] ?? '';
+$filter_class_type = $_GET['class_type'] ?? '';
+
+$where_clauses = [];
+$params = [];
+
+if (!empty($filter_batch_id)) {
+    $where_clauses[] = "l.batch_id = ?";
+    $params[] = $filter_batch_id;
+}
+
+if (!empty($filter_class_type)) {
+    $where_clauses[] = "l.class_type = ?";
+    $params[] = $filter_class_type;
+}
+
+$where_sql = !empty($where_clauses) ? "WHERE " . implode(" AND ", $where_clauses) : "";
+
 // Fetch Lessons with aggregate counts
-$lessons = $pdo->query("
+$query = "
     SELECT l.*, b.name AS batch_name,
            (SELECT COUNT(*) FROM lesson_videos lv WHERE lv.lesson_id = l.id) as video_count,
            (SELECT COUNT(*) FROM lesson_resources lr WHERE lr.lesson_id = l.id) as file_count
     FROM lessons l 
     JOIN batches b ON l.batch_id = b.id 
+    $where_sql
     ORDER BY l.created_at DESC
-")->fetchAll();
-
+";
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
+$lessons = $stmt->fetchAll();
 ?>
 
 <div class="container-fluid py-4">
@@ -135,6 +157,48 @@ $lessons = $pdo->query("
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif; ?>
+
+    <!-- Filter Bar -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <form method="GET" class="row g-2 align-items-center">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted small fw-bold">BATCH</span>
+                        <select name="batch_id" class="form-select border-start-0 small shadow-none">
+                            <option value="">All Batches</option>
+                            <?php foreach ($batches as $batch): ?>
+                                <option value="<?php echo $batch['id']; ?>" <?php echo ($filter_batch_id == $batch['id']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($batch['name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted small fw-bold">TYPE</span>
+                        <select name="class_type" class="form-select border-start-0 small shadow-none">
+                            <option value="">All Types</option>
+                            <option value="Theory" <?php echo ($filter_class_type == 'Theory') ? 'selected' : ''; ?>>Theory</option>
+                            <option value="Revision" <?php echo ($filter_class_type == 'Revision') ? 'selected' : ''; ?>>Revision</option>
+                            <option value="Practical" <?php echo ($filter_class_type == 'Practical') ? 'selected' : ''; ?>>Practical</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4 shadow-sm w-100">
+                        <i class="bi bi-funnel me-1"></i> Filter
+                    </button>
+                    <?php if (!empty($filter_batch_id) || !empty($filter_class_type)): ?>
+                        <a href="lessons.php" class="btn btn-outline-secondary px-3 shadow-sm border-0">
+                            <i class="bi bi-x-circle"></i>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <div class="card border-0 overflow-hidden shadow-sm">
         <div class="table-responsive">
