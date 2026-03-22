@@ -1,7 +1,22 @@
 <?php
 // index.php
 require_once 'config/db.php';
-require_once 'includes/header.php';
+
+// Start session at the very beginning to check for existing login
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// REDIRECT IF ALREADY LOGGED IN
+if (isset($_SESSION['user_id'])) {
+    if ($_SESSION['role'] === 'student') {
+        header('Location: student/dashboard.php');
+        exit;
+    } elseif ($_SESSION['role'] === 'admin') {
+        header('Location: admin/dashboard.php');
+        exit;
+    }
+}
 
 $error = '';
 $success = '';
@@ -125,6 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+require_once 'includes/header.php';
 ?>
 
 <div class="container min-vh-100 d-flex flex-column justify-content-center py-5">
