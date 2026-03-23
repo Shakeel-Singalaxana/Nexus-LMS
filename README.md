@@ -36,4 +36,4 @@ EngTech Nexus is a bespoke LMS platform tailored for managing student progress, 
 * **Password Enforcement:** Students are forced to update their default password upon their first successful login.
 
 ---
-*Developed for the Engineering Technology community.*
+*Developed by shakbrotech.*
