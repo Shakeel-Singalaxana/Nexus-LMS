@@ -86,9 +86,9 @@ $current_announcement = $stmt->fetch();
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card border-0 p-4 h-100 shadow-sm bg-secondary-subtle">
-                <h5 class="fw-bold mb-3 text-secondary"><i class="bi bi-lightbulb me-2 text-warning"></i> Admin Tips</h5>
-                <ul class="small ps-3">
+            <div class="card border-0 p-4 h-100 shadow-sm bg-info-subtle bg-opacity-10 border-start border-4 border-info">
+                <h5 class="fw-bold mb-3 text-info"><i class="bi bi-lightbulb me-2 text-warning"></i> Admin Tips</h5>
+                <ul class="small ps-3 mb-0">
                     <li class="mb-2">Keep messages concise for mobile users.</li>
                     <li class="mb-2">Use announcements for class timing changes, holiday alerts, or exam reminders.</li>
                     <li class="mb-2">You can hide the banner anytime by toggling the switch.</li>

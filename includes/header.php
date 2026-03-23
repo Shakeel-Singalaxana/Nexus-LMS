@@ -52,7 +52,7 @@ $prefix = $is_subfolder ? '../' : './';
             <div class="bg-primary p-2 rounded-3 me-2 shadow-sm">
                 <i class="bi bi-grid-fill text-white h5 mb-0"></i>
             </div>
-            <h4 class="mb-0 fw-bold text-white">Nexus-LMS <span class="badge bg-info-subtle text-info fw-normal" style="font-size: 0.6rem;">v2.3</span></h4>
+            <h4 class="mb-0 fw-bold">Nexus-LMS <span class="badge bg-info-subtle text-info fw-normal" style="font-size: 0.6rem;">v2.3</span></h4>
         </div>
         <nav class="nav flex-column mb-auto">
             <?php if ($user_role === 'admin'): ?>
@@ -75,6 +75,9 @@ $prefix = $is_subfolder ? '../' : './';
                 <a class="nav-link <?php echo ($active_page == 'student_dashboard') ? 'active' : ''; ?>" href="<?php echo $prefix; ?>student/dashboard.php">
                     <i class="bi bi-speedometer2 me-2"></i> Dashboard
                 </a>
+                <a class="nav-link <?php echo ($active_page == 'student_stats') ? 'active' : ''; ?>" href="<?php echo $prefix; ?>student/my_stats.php">
+                    <i class="bi bi-bar-chart-fill me-2"></i> My Stats
+                </a>
             <?php endif; ?>
         </nav>
         <div class="p-4 border-top border-white border-opacity-10">
@@ -83,17 +86,17 @@ $prefix = $is_subfolder ? '../' : './';
                     <i class="bi bi-person-fill"></i>
                 </div>
                 <div class="text-truncate">
-                    <p class="mb-0 small fw-bold text-white"><?php echo $_SESSION['full_name'] ?? 'User'; ?></p>
-                    <p class="mb-0 small text-white-50"><?php echo ucfirst($user_role); ?></p>
+                    <p class="mb-0 small fw-bold"><?php echo $_SESSION['full_name'] ?? 'User'; ?></p>
+                    <p class="mb-0 small text-muted"><?php echo ucfirst($user_role); ?></p>
                 </div>
             </div>
             <a href="<?php echo $prefix; ?>auth/logout.php" class="btn btn-danger w-100 btn-sm shadow-sm">
                 <i class="bi bi-box-arrow-right me-1"></i> Logout
             </a>
-            <div class="text-center mt-3 border-top border-secondary pt-2">
-                <p class="mb-0 x-small text-white-50">&copy; <?php echo date('Y'); ?> <strong>Nexus-LMS</strong></p>
+            <div class="text-center mt-3 border-top border-secondary border-opacity-25 pt-2">
+                <p class="mb-0 x-small text-muted">&copy; <?php echo date('Y'); ?> <strong>Nexus-LMS</strong></p>
                 <p class="mb-0 x-small">
-                    <a href="https://github.com/Shakeel-Singalaxana/" target="_blank" class="text-white-50 text-decoration-none">shakbrotech</a>
+                    <a href="https://github.com/Shakeel-Singalaxana/" target="_blank" class="text-muted text-decoration-none">shakbrotech</a>
                 </p>
             </div>
         </div>
@@ -126,6 +129,9 @@ $prefix = $is_subfolder ? '../' : './';
                 <?php else: ?>
                     <a class="nav-link <?php echo ($active_page == 'student_dashboard') ? 'active' : ''; ?>" href="<?php echo $prefix; ?>student/dashboard.php">
                         <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                    </a>
+                    <a class="nav-link <?php echo ($active_page == 'student_stats') ? 'active' : ''; ?>" href="<?php echo $prefix; ?>student/my_stats.php">
+                        <i class="bi bi-bar-chart-fill me-2"></i> My Stats
                     </a>
                 <?php endif; ?>
             </nav>
