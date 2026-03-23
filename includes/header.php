@@ -39,7 +39,7 @@ $prefix = $is_subfolder ? '../' : './';
 
 <?php if ($is_logged_in): ?>
     <!-- Sidebar Toggle (Mobile) -->
-    <div class="d-lg-none p-3 bg-white border-bottom fixed-top shadow-sm d-flex justify-content-between align-items-center">
+    <div class="d-lg-none p-3 navbar-mobile-top fixed-top shadow-sm d-flex justify-content-between align-items-center">
         <button class="btn btn-outline-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
             <i class="bi bi-list"></i> Menu
         </button>
@@ -80,7 +80,7 @@ $prefix = $is_subfolder ? '../' : './';
                 </a>
             <?php endif; ?>
         </nav>
-        <div class="p-4 border-top border-white border-opacity-10">
+        <div class="p-4 border-top border-theme border-opacity-25">
             <div class="d-flex align-items-center mb-3">
                 <div class="bg-primary rounded-circle p-2 me-2 text-white shadow-sm">
                     <i class="bi bi-person-fill"></i>
@@ -93,7 +93,7 @@ $prefix = $is_subfolder ? '../' : './';
             <a href="<?php echo $prefix; ?>auth/logout.php" class="btn btn-danger w-100 btn-sm shadow-sm">
                 <i class="bi bi-box-arrow-right me-1"></i> Logout
             </a>
-            <div class="text-center mt-3 border-top border-secondary border-opacity-25 pt-2">
+            <div class="text-center mt-3 border-top border-theme border-opacity-25 pt-2">
                 <p class="mb-0 x-small text-muted">&copy; <?php echo date('Y'); ?> <strong>Nexus-LMS</strong></p>
                 <p class="mb-0 x-small">
                     <a href="https://github.com/Shakeel-Singalaxana/" target="_blank" class="text-muted text-decoration-none">shakbrotech</a>
@@ -103,10 +103,10 @@ $prefix = $is_subfolder ? '../' : './';
     </div>
 
     <!-- Offcanvas Sidebar for Mobile -->
-    <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="sidebarOffcanvas" style="width: 280px;">
-        <div class="offcanvas-header border-bottom border-secondary p-4">
+    <div class="offcanvas offcanvas-start border-theme" tabindex="-1" id="sidebarOffcanvas" style="width: 280px;">
+        <div class="offcanvas-header border-bottom border-theme border-opacity-25 p-4">
             <h5 class="offcanvas-title fw-bold">Nexus-LMS <span class="badge bg-primary fs-7 px-2">v2.3</span></h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body p-0 py-3 d-flex flex-column h-100">
             <nav class="nav flex-column mb-auto">
@@ -135,11 +135,11 @@ $prefix = $is_subfolder ? '../' : './';
                     </a>
                 <?php endif; ?>
             </nav>
-            <div class="p-4 border-top border-secondary mt-auto text-center">
+            <div class="p-4 border-top border-theme border-opacity-25 mt-auto text-center">
                 <a href="<?php echo $prefix; ?>auth/logout.php" class="btn btn-outline-danger w-100 mb-3">Logout</a>
-                <p class="mb-0 x-small text-white-50">&copy; <?php echo date('Y'); ?> <strong>Nexus-LMS</strong></p>
+                <p class="mb-0 x-small text-muted">&copy; <?php echo date('Y'); ?> <strong>Nexus-LMS</strong></p>
                 <p class="mb-0 x-small">
-                    <a href="https://github.com/Shakeel-Singalaxana/" target="_blank" class="text-white-50 text-decoration-none">shakbrotech</a>
+                    <a href="https://github.com/Shakeel-Singalaxana/" target="_blank" class="text-muted text-decoration-none">shakbrotech</a>
                 </p>
             </div>
         </div>

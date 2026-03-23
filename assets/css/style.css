@@ -225,61 +225,72 @@ h1, h2, h3, h4, .fw-bold {
 }
 
 /* Sidebar Styling */
+#sidebar, .offcanvas, .offcanvas-header, .offcanvas-body {
+    background-color: var(--sidebar-bg) !important;
+    color: var(--sidebar-text) !important;
+}
+
+/* Mobile top bar fix */
+.navbar-mobile-top {
+    background-color: var(--card-bg) !important;
+    color: var(--text-dark) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+
 #sidebar {
     height: 100vh;
     width: 280px;
     position: fixed;
     top: 0;
     left: 0;
-    background-color: var(--sidebar-bg);
-    color: var(--sidebar-text);
     z-index: 1000;
     border-right: 1px solid var(--card-border);
     transition: all 0.3s ease;
 }
 
-#sidebar .nav-link {
+[data-theme='dark'] .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+#sidebar .nav-link, .offcanvas .nav-link {
     color: var(--text-muted);
     padding: 12px 24px;
     border-radius: 8px;
     margin: 4px 16px;
     transition: all 0.2s;
     font-weight: 500;
+    display: flex;
+    align-items: center;
 }
 
-#sidebar .nav-link:hover {
+#sidebar .nav-link:hover, .offcanvas .nav-link:hover {
     background: var(--bg-light);
-    color: var(--primary-color);
+    color: var(--primary-color) !important;
 }
 
-#sidebar .nav-link.active {
-    background-color: var(--primary-color);
-    color: white;
+[data-theme='dark'] #sidebar .nav-link:hover, [data-theme='dark'] .offcanvas .nav-link:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+#sidebar .nav-link.active, .offcanvas .nav-link.active {
+    background-color: var(--primary-color) !important;
+    color: white !important;
     box-shadow: 0 10px 15px -3px rgba(13, 110, 253, 0.2);
 }
 
-#sidebar .nav-link i {
+#sidebar .nav-link i, .offcanvas .nav-link i {
     transition: color 0.2s;
-    opacity: 0.7;
+    opacity: 0.8;
 }
 
-#sidebar .nav-link:hover i,
-#sidebar .nav-link.active i {
+#sidebar .nav-link:hover i, .offcanvas .nav-link:hover i,
+#sidebar .nav-link.active i, .offcanvas .nav-link.active i {
     opacity: 1;
 }
 
-[data-theme='dark'] #sidebar .nav-link {
-    color: #94a3b8 !important; 
-}
-
-[data-theme='dark'] #sidebar .nav-link:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: #f8fafc !important;
-}
-
-[data-theme='dark'] #sidebar .nav-link.active {
-    color: white !important;
-    background-color: var(--primary-color) !important;
+/* Fix text and secondary borders to be theme-aware */
+.border-theme {
+    border-color: var(--card-border) !important;
 }
 
 .sidebar-header h4 {
