@@ -114,7 +114,7 @@ $students = $pdo->query("
 
     <div class="row mb-4">
         <div class="col-md-6">
-            <div class="search-container shadow-sm border rounded-pill overflow-hidden bg-white">
+            <div class="search-container shadow-sm border rounded-pill overflow-hidden">
                 <i class="bi bi-search h5 mb-0 opacity-50"></i>
                 <input type="text" id="studentSearch" class="form-control border-0 ps-5 py-3" placeholder="Search student by name or mobile number...">
             </div>
@@ -236,7 +236,7 @@ $students = $pdo->query("
                             </div>
                             <p class="text-muted small">The student will be able to access all lessons belonging to this batch.</p>
                         </div>
-                        <div class="modal-footer bg-light border-0">
+                        <div class="modal-footer border-0">
                             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button type="submit" name="assign_batch" class="btn btn-primary px-4">Update Student Batch</button>
                         </div>
@@ -263,7 +263,7 @@ $students = $pdo->query("
                     <div class="spinner-border text-primary" role="status"></div>
                 </div>
             </div>
-            <div class="modal-footer bg-light border-0">
+            <div class="modal-footer border-0">
                 <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
@@ -298,32 +298,39 @@ document.querySelectorAll('.stats-btn').forEach(btn => {
 
                 // Build Stats Grid
                 let statsHtml = `
-                    <div class="row g-4 mb-4">
-                        <div class="col-md-4">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
                             <div class="card border-0 bg-info-subtle p-3 rounded-4 shadow-sm h-100">
-                                <h6 class="text-muted small fw-bold text-uppercase mb-2">Lessons Completed</h6>
+                                <h6 class="text-muted small fw-bold text-uppercase mb-2">Lessons</h6>
                                 <h3 class="fw-bold mb-0 text-info">${data.completed_count} <small class="text-muted fw-normal" style="font-size: 0.8rem;">/ ${data.total_lessons}</small></h3>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="card border-0 bg-primary-subtle p-3 rounded-4 shadow-sm h-100">
-                                <h6 class="text-muted small fw-bold text-uppercase mb-2">Completion Rate</h6>
+                                <h6 class="text-muted small fw-bold text-uppercase mb-2">Completion</h6>
                                 <h3 class="fw-bold mb-1 text-primary">${data.completion_rate}%</h3>
                                 <div class="progress" style="height: 4px;">
                                     <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: ${data.completion_rate}%"></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="card border-0 bg-success-subtle p-3 rounded-4 shadow-sm h-100">
-                                <h6 class="text-muted small fw-bold text-uppercase mb-2">Videos Watched</h6>
+                                <h6 class="text-muted small fw-bold text-uppercase mb-2">Videos</h6>
                                 <h3 class="fw-bold mb-0 text-success">${data.videos_watched}</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 bg-warning-subtle p-3 rounded-4 shadow-sm h-100">
+                                <h6 class="text-muted small fw-bold text-uppercase mb-2">Rank</h6>
+                                <h4 class="fw-bold mb-0" style="color: #856404;">Lvl ${data.level}</h4>
+                                <small class="text-muted">${data.level_title}</small>
                             </div>
                         </div>
                     </div>
 
                     <h6 class="fw-bold mb-3 border-start border-3 border-primary ps-2">Curriculum Progress Track</h6>
-                    <div class="table-responsive bg-white rounded-3 border">
+                    <div class="table-responsive rounded-3 border">
                         <table class="table table-sm align-middle mb-0">
                             <thead class="bg-light">
                                 <tr class="small text-muted">

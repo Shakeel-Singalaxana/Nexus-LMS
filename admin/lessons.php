@@ -168,9 +168,9 @@ $lessons = $stmt->fetchAll();
         <div class="card-body p-3">
             <form method="GET" class="row g-2 align-items-center">
                 <div class="col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0 text-muted small fw-bold">BATCH</span>
-                        <select name="batch_id" class="form-select border-start-0 small shadow-none">
+                        <div class="input-group border rounded shadow-none overflow-hidden">
+                            <span class="input-group-text bg-transparent border-0 text-muted small fw-bold">BATCH</span>
+                            <select name="batch_id" class="form-select border-0 small shadow-none bg-transparent">
                             <option value="">All Batches</option>
                             <?php foreach ($batches as $batch): ?>
                                 <option value="<?php echo $batch['id']; ?>" <?php echo ($filter_batch_id == $batch['id']) ? 'selected' : ''; ?>>
@@ -181,9 +181,9 @@ $lessons = $stmt->fetchAll();
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0 text-muted small fw-bold">TYPE</span>
-                        <select name="class_type" class="form-select border-start-0 small shadow-none">
+                        <div class="input-group border rounded shadow-none overflow-hidden">
+                            <span class="input-group-text bg-transparent border-0 text-muted small fw-bold">TYPE</span>
+                            <select name="class_type" class="form-select border-0 small shadow-none bg-transparent">
                             <option value="">All Types</option>
                             <option value="Theory" <?php echo ($filter_class_type == 'Theory') ? 'selected' : ''; ?>>Theory</option>
                             <option value="Revision" <?php echo ($filter_class_type == 'Revision') ? 'selected' : ''; ?>>Revision</option>
@@ -227,7 +227,7 @@ $lessons = $stmt->fetchAll();
                                     <div class="fw-bold"><?php echo htmlspecialchars($lesson['title']); ?></div>
                                     <small class="text-muted">Created: <?php echo date('Y-m-d', strtotime($lesson['created_at'])); ?></small>
                                 </td>
-                                <td><span class="badge bg-secondary-subtle text-dark"><?php echo htmlspecialchars($lesson['batch_name']); ?></span></td>
+                                <td><span class="badge bg-secondary-subtle"><?php echo htmlspecialchars($lesson['batch_name']); ?></span></td>
                                 <td>
                                     <?php 
                                     $badge_class = 'bg-primary';
@@ -308,7 +308,7 @@ $lessons = $stmt->fetchAll();
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light border-0">
+                <div class="modal-footer border-0">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" name="add_lesson" class="btn btn-primary px-5">Publish Lesson</button>
                 </div>

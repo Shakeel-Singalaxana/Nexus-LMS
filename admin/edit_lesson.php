@@ -170,8 +170,8 @@ $batches = $pdo->query("SELECT * FROM batches ORDER BY name DESC")->fetchAll();
                 
                 <div class="list-group list-group-flush mb-4">
                     <?php foreach ($videos as $v): ?>
-                        <div class="list-group-item d-flex justify-content-between align-items-center bg-light rounded-3 mb-2 border-0 px-3">
-                            <span class="text-truncate small"><?php echo htmlspecialchars($v['video_url']); ?></span>
+                        <div class="list-group-item d-flex justify-content-between align-items-center border rounded-3 mb-2 px-3 bg-transparent">
+                            <span class="text-truncate small fw-bold"><?php echo htmlspecialchars($v['video_url']); ?></span>
                             <form method="POST" class="ms-2">
                                 <input type="hidden" name="video_id" value="<?php echo $v['id']; ?>">
                                 <button type="submit" name="delete_video" onclick="return confirm('Remove video?')" class="btn btn-sm btn-link text-danger"><i class="bi bi-x-circle-fill"></i></button>
@@ -193,10 +193,10 @@ $batches = $pdo->query("SELECT * FROM batches ORDER BY name DESC")->fetchAll();
                 
                 <div class="list-group list-group-flush mb-4">
                     <?php foreach ($resources as $r): ?>
-                        <div class="list-group-item d-flex justify-content-between align-items-center bg-light rounded-3 mb-2 border-0 px-3">
-                            <span class="text-truncate small">
+                        <div class="list-group-item d-flex justify-content-between align-items-center border rounded-3 mb-2 px-3 bg-transparent">
+                            <span class="text-truncate small fw-bold">
                                 <?php if ($r['resource_type'] == 'link'): ?>
-                                    <i class="bi bi-link-45deg me-2 text-primary"></i> <span class="text-muted">Link:</span> <?php echo htmlspecialchars($r['file_path']); ?>
+                                    <i class="bi bi-link-45deg me-2 text-primary"></i> <span class="opacity-75">Link:</span> <?php echo htmlspecialchars($r['file_path']); ?>
                                 <?php else: ?>
                                     <i class="bi bi-paperclip me-2 text-success"></i> <?php echo htmlspecialchars($r['file_name']); ?>
                                 <?php endif; ?>

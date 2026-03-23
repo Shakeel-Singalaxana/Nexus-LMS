@@ -63,7 +63,20 @@ try {
     $stmt->execute([$student_id, $student['batch_id']]);
     $completions = $stmt->fetchAll();
 
+    // 5. Calculate Level
     $completion_rate = $total_lessons > 0 ? round(($completed_lessons_count / $total_lessons) * 100, 1) : 0;
+    
+    // Overall rate might consider videos too
+    $video_rate = $videos_watched > 0 ? 100 : 0; // simplistic for now
+    // Actually, let's just use completion_rate for simplicity
+    
+    $level = 1;
+    $level_title = 'Apprentice';
+    if ($completion_rate >= 90) { $level = 6; $level_title = 'Master'; }
+    else if ($completion_rate >= 70) { $level = 5; $level_title = 'Expert'; }
+    else if ($completion_rate >= 50) { $level = 4; $level_title = 'Scholar'; }
+    else if ($completion_rate >= 30) { $level = 3; $level_title = 'Learner'; }
+    else if ($completion_rate >= 10) { $level = 2; $level_title = 'Novice'; }
 
     echo json_encode([
         'full_name' => $student['full_name'],
@@ -72,6 +85,8 @@ try {
         'completed_count' => $completed_lessons_count,
         'videos_watched' => $videos_watched,
         'completion_rate' => $completion_rate,
+        'level' => $level,
+        'level_title' => $level_title,
         'history' => $completions
     ]);
 

@@ -136,14 +136,26 @@ $video_percent = ($total_videos > 0) ? round(($completed_videos / $total_videos)
             </div>
         </div>
         <div class="col-md-6 col-lg-3">
+            <?php 
+                $overall_prog = floor(($lesson_percent + $video_percent) / 2);
+                $level = 1;
+                $level_title = 'Apprentice';
+                $level_icon = 'bi-lightning-fill';
+                
+                if ($overall_prog >= 90) { $level = 6; $level_title = 'Master'; }
+                else if ($overall_prog >= 70) { $level = 5; $level_title = 'Expert'; }
+                else if ($overall_prog >= 50) { $level = 4; $level_title = 'Scholar'; }
+                else if ($overall_prog >= 30) { $level = 3; $level_title = 'Learner'; }
+                else if ($overall_prog >= 10) { $level = 2; $level_title = 'Novice'; }
+            ?>
             <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100">
                 <div class="bg-warning-subtle text-warning p-3 rounded-circle d-inline-block mx-auto mb-3">
-                    <i class="bi bi-lightning-fill h3 mb-0"></i>
+                    <i class="bi <?php echo $level_icon; ?> h3 mb-0"></i>
                 </div>
-                <h3 class="fw-bold mb-0">Level 1</h3>
-                <p class="text-muted small mb-0">Apprentice</p>
+                <h3 class="fw-bold mb-0">Level <?php echo $level; ?></h3>
+                <p class="text-muted small mb-0"><?php echo $level_title; ?></p>
                 <div class="progress mt-3" style="height: 6px;">
-                    <div class="progress-bar bg-warning" style="width: 25%"></div>
+                    <div class="progress-bar bg-warning" style="width: <?php echo $overall_prog; ?>%"></div>
                 </div>
             </div>
         </div>

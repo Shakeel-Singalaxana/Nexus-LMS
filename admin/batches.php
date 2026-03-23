@@ -156,9 +156,9 @@ foreach ($all_students as $s) {
                         </div>
                         <div class="modal-body p-4">
                             <!-- In-Modal Search -->
-                            <div class="input-group mb-4 shadow-sm">
-                                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                                <input type="text" class="form-control border-start-0 py-2 student-modal-search" 
+                            <div class="input-group mb-4 shadow-sm border rounded-3 overflow-hidden">
+                                <span class="input-group-text bg-transparent border-0"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" class="form-control border-0 py-2 student-modal-search bg-transparent" 
                                        placeholder="Search students within this batch..." 
                                        data-batch-id="<?php echo $batch['id']; ?>">
                             </div>
@@ -173,14 +173,14 @@ foreach ($all_students as $s) {
                                     </div>
                                 <?php else: ?>
                                     <?php foreach ($batch_students as $student): ?>
-                                        <div class="list-group-item p-3 student-list-item" data-search-term="<?php echo strtolower($student['full_name'] . ' ' . ($student['mobile_number'] ?? '')); ?>">
+                                        <div class="list-group-item p-3 student-list-item bg-transparent" data-search-term="<?php echo strtolower($student['full_name'] . ' ' . ($student['mobile_number'] ?? '')); ?>">
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div class="d-flex align-items-center">
                                                     <div class="bg-primary-subtle text-primary rounded-circle p-2 me-3">
                                                         <i class="bi bi-person-fill"></i>
                                                     </div>
                                                     <div>
-                                                        <div class="fw-bold mb-0 text-dark"><?php echo htmlspecialchars($student['full_name']); ?></div>
+                                                        <div class="fw-bold mb-0"><?php echo htmlspecialchars($student['full_name']); ?></div>
                                                         <div class="small text-muted">
                                                             <i class="bi bi-phone me-1"></i><?php echo htmlspecialchars($student['mobile_number'] ?? 'N/A'); ?>
                                                         </div>
@@ -199,7 +199,7 @@ foreach ($all_students as $s) {
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <div class="modal-footer bg-light border-0">
+                        <div class="modal-footer border-0">
                             <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
@@ -209,7 +209,7 @@ foreach ($all_students as $s) {
             <!-- Edit Batch Modal -->
             <div class="modal fade" id="editBatchModal<?php echo $batch['id']; ?>" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content border-0 shadow-lg text-dark">
+                    <div class="modal-content border-0 shadow-lg">
                         <div class="modal-header border-bottom-0 p-4">
                             <h5 class="modal-title fw-bold">Edit Batch Name</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
