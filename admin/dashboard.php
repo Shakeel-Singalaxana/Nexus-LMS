@@ -251,7 +251,7 @@ $students = $pdo->query("
 <div class="modal fade" id="studentStatsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-dark text-white border-bottom-0 p-4">
+            <div class="modal-header border-bottom-0 p-4">
                 <div id="statsHeaderContent">
                     <h5 class="modal-title fw-bold">Student Performance</h5>
                     <p class="mb-0 small opacity-75">Loading analytics...</p>
@@ -323,7 +323,7 @@ document.querySelectorAll('.stats-btn').forEach(btn => {
                         <div class="col-md-3">
                             <div class="card border-0 bg-warning-subtle p-3 rounded-4 shadow-sm h-100">
                                 <h6 class="text-muted small fw-bold text-uppercase mb-2">Rank</h6>
-                                <h4 class="fw-bold mb-0" style="color: #856404;">Lvl ${data.level}</h4>
+                                <h4 class="fw-bold mb-0" style="color: var(--level-text);">Lvl ${data.level}</h4>
                                 <small class="text-muted">${data.level_title}</small>
                             </div>
                         </div>

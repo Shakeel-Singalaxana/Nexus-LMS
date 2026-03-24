@@ -174,7 +174,7 @@ function getYouTubeID($url) {
                 <div class="row g-2 justify-content-lg-end">
                     <?php foreach ($class_types as $type): ?>
                         <div class="col-4">
-                            <div class="p-2 border rounded-3 small bg-white shadow-sm">
+                            <div class="p-2 card border-0 rounded-3 small shadow-sm">
                                 <div class="d-flex justify-content-between mb-1">
                                     <span class="fw-bold text-muted" style="font-size: 0.7rem;"><?php echo strtoupper($type); ?></span>
                                     <span class="fw-bold text-primary" style="font-size: 0.7rem;"><?php echo $progress_stats[$type] ?? 0; ?>%</span>
@@ -191,7 +191,7 @@ function getYouTubeID($url) {
 
         <div class="row mb-4 align-items-center g-3">
             <div class="col-md-6">
-                <div class="nav-pills-container bg-white border p-1 rounded-pill shadow-sm d-inline-flex">
+                <div class="nav-pills-container card border-0 p-1 rounded-pill shadow-sm d-inline-flex flex-row">
                     <?php foreach ($class_types as $type): ?>
                         <a href="?type=<?php echo $type; ?>" class="btn btn-sm px-4 rounded-pill <?php echo ($active_type == $type) ? 'btn-primary shadow-sm' : 'btn-link text-muted text-decoration-none'; ?>">
                             <?php echo $type; ?>
@@ -202,7 +202,7 @@ function getYouTubeID($url) {
             <div class="col-md-6 text-md-end">
                 <div class="search-container ms-auto">
                     <i class="bi bi-search"></i>
-                    <input type="text" id="lessonSearch" class="form-control bg-white" placeholder="Search lessons by title...">
+                    <input type="text" id="lessonSearch" class="form-control" placeholder="Search lessons by title...">
                 </div>
             </div>
         </div>
@@ -210,7 +210,7 @@ function getYouTubeID($url) {
         <div class="row g-4" id="lessonsGrid">
             <?php if (!$batch_id): ?>
                 <div class="col-12 text-center py-5">
-                    <div class="p-5 bg-white rounded-4 border shadow-sm d-inline-block">
+                    <div class="p-5 card border-0 rounded-4 shadow-sm d-inline-block">
                         <i class="bi bi-folder-x h1 text-warning opacity-50 d-block mb-3"></i>
                         <h4 class="fw-bold">No Batch Assigned</h4>
                         <p class="text-muted small">Please contact administration to assign you to a batch (e.g. 2026AL).</p>
@@ -218,7 +218,7 @@ function getYouTubeID($url) {
                 </div>
             <?php elseif (empty($lessons)): ?>
                 <div class="col-12 text-center py-5">
-                    <div class="p-5 bg-white rounded-4 border shadow-sm d-inline-block">
+                    <div class="p-5 card border-0 rounded-4 shadow-sm d-inline-block">
                         <i class="bi bi-journals h1 text-muted opacity-25 d-block mb-3"></i>
                         <h4 class="fw-bold">No <?php echo $active_type; ?> Lessons</h4>
                         <p class="text-muted small">The administrator hasn't uploaded any content for this category yet.</p>

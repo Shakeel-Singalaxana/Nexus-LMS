@@ -100,7 +100,7 @@ $video_percent = ($total_videos > 0) ? round(($completed_videos / $total_videos)
     <!-- Summary Cards -->
     <div class="row g-4 mb-4 text-center">
         <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100">
+            <div class="card border-0 shadow-sm p-4 rounded-4 h-100">
                 <div class="bg-primary-subtle text-primary p-3 rounded-circle d-inline-block mx-auto mb-3">
                     <i class="bi bi-journal-check h3 mb-0"></i>
                 </div>
@@ -112,7 +112,7 @@ $video_percent = ($total_videos > 0) ? round(($completed_videos / $total_videos)
             </div>
         </div>
         <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100">
+            <div class="card border-0 shadow-sm p-4 rounded-4 h-100">
                 <div class="bg-danger-subtle text-danger p-3 rounded-circle d-inline-block mx-auto mb-3">
                     <i class="bi bi-play-circle-fill h3 mb-0"></i>
                 </div>
@@ -124,7 +124,7 @@ $video_percent = ($total_videos > 0) ? round(($completed_videos / $total_videos)
             </div>
         </div>
         <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100">
+            <div class="card border-0 shadow-sm p-4 rounded-4 h-100">
                 <div class="bg-success-subtle text-success p-3 rounded-circle d-inline-block mx-auto mb-3">
                     <i class="bi bi-award h3 mb-0"></i>
                 </div>
@@ -148,7 +148,7 @@ $video_percent = ($total_videos > 0) ? round(($completed_videos / $total_videos)
                 else if ($overall_prog >= 30) { $level = 3; $level_title = 'Learner'; }
                 else if ($overall_prog >= 10) { $level = 2; $level_title = 'Novice'; }
             ?>
-            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100">
+            <div class="card border-0 shadow-sm p-4 rounded-4 h-100">
                 <div class="bg-warning-subtle text-warning p-3 rounded-circle d-inline-block mx-auto mb-3">
                     <i class="bi <?php echo $level_icon; ?> h3 mb-0"></i>
                 </div>
@@ -164,7 +164,7 @@ $video_percent = ($total_videos > 0) ? round(($completed_videos / $total_videos)
     <div class="row g-4">
         <!-- Performance by Category -->
         <div class="col-lg-6">
-            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100">
+            <div class="card border-0 shadow-sm p-4 rounded-4 h-100">
                 <h5 class="fw-bold mb-4">Category Progress</h5>
                 <?php foreach ($stats_by_cat as $cat => $data): ?>
                     <div class="mb-4">
@@ -183,7 +183,7 @@ $video_percent = ($total_videos > 0) ? round(($completed_videos / $total_videos)
                     </div>
                 <?php endforeach; ?>
                 
-                <div class="mt-2 p-3 bg-light rounded-3">
+                <div class="mt-2 p-3 card border-0 bg-secondary-subtle rounded-3">
                     <p class="mb-0 small text-muted"><i class="bi bi-info-circle me-1"></i> Completion increases as you finish videos and lessons assigned to your batch.</p>
                 </div>
             </div>
@@ -191,7 +191,7 @@ $video_percent = ($total_videos > 0) ? round(($completed_videos / $total_videos)
 
         <!-- Recent Activity Feed -->
         <div class="col-lg-6">
-            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100">
+            <div class="card border-0 shadow-sm p-4 rounded-4 h-100">
                 <h5 class="fw-bold mb-4">Recent Activity</h5>
                 <?php if (empty($recent_activity)): ?>
                     <div class="text-center py-5">

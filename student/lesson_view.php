@@ -234,7 +234,7 @@ $completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 <div class="container py-4 lesson-content-area">
     <!-- Header -->
-    <div class="row mb-5 align-items-center bg-white p-4 rounded-4 border shadow-sm mx-0">
+    <div class="row mb-5 align-items-center card border-0 p-4 rounded-4 shadow-sm mx-0 flex-row">
         <div class="col-md-8">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-2 small">
@@ -273,11 +273,11 @@ $completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
                     $yt_id = getYouTubeID($video['video_url']);
                 ?>
                 <div class="col-12">
-                    <div class="card border-0 shadow-sm overflow-hidden bg-white rounded-4 <?php echo $is_watched ? 'border-success border-top border-4' : ''; ?>" id="video_card_<?php echo $video['id']; ?>">
-                        <div class="card-header bg-light border-0 py-3 px-4 d-flex align-items-center justify-content-between">
+                    <div class="card border-0 shadow-sm overflow-hidden rounded-4 <?php echo $is_watched ? 'border-success border-top border-4' : ''; ?>" id="video_card_<?php echo $video['id']; ?>">
+                        <div class="card-header bg-secondary-subtle border-0 py-3 px-4 d-flex align-items-center justify-content-between">
                             <span class="fw-bold text-dark"><i class="bi bi-play-btn-fill text-danger me-2"></i> PART <?php echo $index + 1; ?></span>
                             <div class="d-flex align-items-center gap-3">
-                                <small class="text-muted"><i class="bi bi-shield-lock-fill me-1"></i> Secured Player</small>
+                                <small class="text-muted"><i class="bi bi-shield-lock-fill me-1"></i></small>
                                 <div id="status_badge_<?php echo $video['id']; ?>">
                                     <?php if ($is_watched): ?>
                                         <span class="badge bg-success-subtle text-success py-1 px-3 rounded-pill">
@@ -332,7 +332,7 @@ $completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <div class="card-footer bg-white py-3 px-4 text-end border-0" id="video_footer_<?php echo $video['id']; ?>">
+                        <div class="card-footer py-3 px-4 text-end border-0" id="video_footer_<?php echo $video['id']; ?>">
                             <?php if ($is_watched): ?>
                                 <button class="btn btn-sm btn-success rounded-pill px-4 disabled">
                                     <i class="bi bi-check-circle-fill me-1"></i> Completed
@@ -358,7 +358,7 @@ $completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
         <div class="row g-3">
             <?php foreach ($resources as $res): ?>
                 <div class="col-md-6 col-lg-4">
-                    <div class="card border-0 shadow-sm p-3 bg-white hover-up transition-all rounded-4">
+                    <div class="card border-0 shadow-sm p-3 hover-up transition-all rounded-4">
                         <div class="d-flex align-items-center">
                             <div class="bg-primary-subtle text-primary p-3 rounded-circle me-3">
                                 <?php 
@@ -400,7 +400,7 @@ $completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
     <?php if (empty($videos) && empty($resources)): ?>
         <div class="text-center py-5">
-            <div class="p-5 bg-white rounded-4 shadow-sm d-inline-block border">
+            <div class="p-5 card border-0 rounded-4 shadow-sm d-inline-block">
                 <i class="bi bi-inbox text-muted h1 opacity-25 d-block mb-3"></i>
                 <p class="text-muted">This lesson container is currently empty.</p>
             </div>

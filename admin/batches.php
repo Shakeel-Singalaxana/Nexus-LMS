@@ -81,9 +81,6 @@ foreach ($all_students as $s) {
     transform: translateY(-5px);
     box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
 }
-.student-list-item:hover {
-    background-color: var(--bs-light);
-}
 </style>
 
 <div class="container-fluid py-4">
@@ -147,7 +144,7 @@ foreach ($all_students as $s) {
             <div class="modal fade" id="viewBatchModal<?php echo $batch['id']; ?>" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                     <div class="modal-content border-0 shadow-lg">
-                        <div class="modal-header bg-primary text-white border-bottom-0 p-4">
+                        <div class="modal-header border-bottom-0 p-4">
                             <div>
                                 <h5 class="modal-title fw-bold mb-0"><?php echo htmlspecialchars($batch['name']); ?> - Student List</h5>
                                 <p class="mb-0 small opacity-75">Total of <?php echo $batch['student_count']; ?> students enrolled</p>
