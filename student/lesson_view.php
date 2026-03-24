@@ -21,39 +21,8 @@ if (!$lesson_id) {
 
 $user_id = $_SESSION['user_id'];
 
-// Handle video completion (BEFORE HEADER) - Keep for fallback
-if (isset($_POST['mark_video_done'])) {
-    $video_id = (int)$_POST['video_id'];
-    $stmt = $pdo->prepare("INSERT IGNORE INTO video_progress (user_id, video_id) VALUES (?, ?)");
-    $stmt->execute([$user_id, $video_id]);
-    
-    // Check if all videos in this lesson are completed
-    $stmt = $pdo->prepare("SELECT id FROM lesson_videos WHERE lesson_id = ?");
-    $stmt->execute([$lesson_id]);
-    $all_vids = $stmt->fetchAll(PDO::FETCH_COLUMN);
-    
-    if (!empty($all_vids)) {
-        $stmt = $pdo->prepare("SELECT video_id FROM video_progress WHERE user_id = ? AND video_id IN (" . implode(',', array_fill(0, count($all_vids), '?')) . ")");
-        $stmt->execute(array_merge([$user_id], $all_vids));
-        $watched_vids = $stmt->fetchAll(PDO::FETCH_COLUMN);
-        
-        if (count($watched_vids) === count($all_vids)) {
-            $stmt = $pdo->prepare("INSERT IGNORE INTO progress (user_id, lesson_id) VALUES (?, ?)");
-            $stmt->execute([$user_id, $lesson_id]);
-        }
-    }
-
-    header("Location: lesson_view.php?id=$lesson_id");
-    exit;
-}
-
-// Handle lesson completion (BEFORE HEADER) - Keep for fallback
-if (isset($_POST['mark_done'])) {
-    $stmt = $pdo->prepare("INSERT IGNORE INTO progress (user_id, lesson_id) VALUES (?, ?)");
-    $stmt->execute([$user_id, $lesson_id]);
-    header("Location: lesson_view.php?id=$lesson_id");
-    exit;
-}
+// Handle video completion has been moved to API
+// Handle lesson completion has been moved to API
 
 // Now include header and set titles
 $active_page = 'student_dashboard';
@@ -189,29 +158,122 @@ $completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
     .progress-container {
         flex-grow: 1;
-        height: 4px;
-        background: rgba(255,255,255,0.2);
+        height: 6px;
+        background: rgba(255,255,255,0.3);
         position: relative;
         cursor: pointer;
-        border-radius: 2px;
+        border-radius: 3px;
+        transition: height 0.2s;
+    }
+    .progress-container:hover {
+        height: 8px;
     }
     .progress-bar {
         height: 100%;
         background: #3b82f6;
         width: 0%;
-        border-radius: 2px;
+        border-radius: 3px;
     }
     
     .speed-badge {
-        font-size: 0.75rem;
+        font-size: 0.85rem;
         font-weight: bold;
-        background: rgba(255,255,255,0.1);
-        padding: 2px 8px;
+        background: rgba(255,255,255,0.2);
+        padding: 4px 8px;
         border-radius: 4px;
         cursor: pointer;
+        transition: background 0.2s;
     }
     .speed-badge:hover {
-        background: rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.3);
+    }
+    
+    .volume-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    .volume-slider-wrapper {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.8);
+        padding: 10px;
+        border-radius: 5px;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s;
+        margin-bottom: 10px;
+    }
+    .volume-container:hover .volume-slider-wrapper {
+        opacity: 1;
+        visibility: visible;
+    }
+    .volume-slider {
+        -webkit-appearance: slider-vertical;
+        width: 8px;
+        height: 80px;
+        outline: none;
+        cursor: pointer;
+    }
+    
+    .quality-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    .quality-menu {
+        position: absolute;
+        bottom: 100%;
+        right: 0;
+        background: rgba(0,0,0,0.8);
+        border-radius: 5px;
+        padding: 5px 0;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s;
+        display: flex;
+        flex-direction: column;
+        min-width: 80px;
+        margin-bottom: 10px;
+    }
+    .quality-container:hover .quality-menu {
+        opacity: 1;
+        visibility: visible;
+    }
+    .quality-btn {
+        background: none;
+        border: none;
+        color: white;
+        padding: 5px 15px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        text-align: left;
+    }
+    .quality-btn:hover {
+        background: #3b82f6;
+    }
+    .quality-btn.active {
+        color: #3b82f6;
+        font-weight: bold;
+        background: rgba(255,255,255,0.1);
+    }
+    .quality-toggle {
+        font-size: 1.2rem;
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s;
+    }
+    .quality-toggle:hover {
+        color: #3b82f6;
+        transform: scale(1.1);
     }
 
     .video-wrapper {
@@ -254,11 +316,9 @@ $completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
                     <i class="bi bi-check-circle-fill me-2"></i> Lesson Completed
                 </div>
             <?php else: ?>
-                <form method="POST">
-                    <button type="submit" name="mark_done" class="btn btn-primary rounded-pill px-4 py-2 shadow">
-                        <i class="bi bi-check2-circle me-2"></i> Mark Lesson as Done
-                    </button>
-                </form>
+                <div class="btn btn-warning rounded-pill px-4 py-2 disabled shadow-none text-dark">
+                    <i class="bi bi-clock-fill me-2"></i> Lesson Incomplete
+                </div>
             <?php endif; ?>
         </div>
     </div>
@@ -285,7 +345,7 @@ $completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
                                         </span>
                                     <?php else: ?>
                                         <span class="badge bg-warning-subtle text-warning py-1 px-3 rounded-pill">
-                                            <i class="bi bi-clock-fill me-1"></i> Not Watched
+                                            <i class="bi bi-clock-fill me-1"></i> Incomplete
                                         </span>
                                     <?php endif; ?>
                                 </div>
@@ -302,19 +362,41 @@ $completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
                             <!-- Custom Controls Bar -->
                             <div class="custom-player-controls" id="controls_<?php echo $video['id']; ?>">
-                                <button class="control-btn" onclick="togglePlay(<?php echo $video['id']; ?>)">
+                                <button class="control-btn" onclick="skip(<?php echo $video['id']; ?>, -10)" title="Rewind 10s">
+                                    <i class="bi bi-rewind-fill"></i>
+                                </button>
+                                <button class="control-btn" onclick="togglePlay(<?php echo $video['id']; ?>)" title="Play/Pause">
                                     <i class="bi bi-play-fill" id="play_icon_<?php echo $video['id']; ?>"></i>
+                                </button>
+                                <button class="control-btn" onclick="skip(<?php echo $video['id']; ?>, 10)" title="Forward 10s">
+                                    <i class="bi bi-fast-forward-fill"></i>
                                 </button>
                                 
                                 <div class="progress-container" onclick="seek(event, <?php echo $video['id']; ?>)">
                                     <div class="progress-bar" id="progress_bar_<?php echo $video['id']; ?>"></div>
                                 </div>
                                 
-                                <button class="control-btn" onclick="toggleMute(<?php echo $video['id']; ?>)">
-                                    <i class="bi bi-volume-up-fill" id="volume_icon_<?php echo $video['id']; ?>"></i>
-                                </button>
+                                <div class="volume-container">
+                                    <button class="control-btn" onclick="toggleMute(<?php echo $video['id']; ?>)" title="Mute/Unmute">
+                                        <i class="bi bi-volume-up-fill" id="volume_icon_<?php echo $video['id']; ?>"></i>
+                                    </button>
+                                    <div class="volume-slider-wrapper">
+                                        <input type="range" class="volume-slider" min="0" max="100" value="100" id="volume_slider_<?php echo $video['id']; ?>" oninput="changeVolume(<?php echo $video['id']; ?>, this.value)">
+                                    </div>
+                                </div>
                                 
-                                <div class="speed-badge" onclick="cycleSpeed(<?php echo $video['id']; ?>)" id="speed_<?php echo $video['id']; ?>">1x</div>
+                                <div class="speed-badge" onclick="cycleSpeed(<?php echo $video['id']; ?>)" id="speed_<?php echo $video['id']; ?>" title="Playback Speed">1x</div>
+                                
+                                <div class="quality-container">
+                                    <button class="quality-toggle" title="Quality Settings"><i class="bi bi-gear-fill"></i></button>
+                                    <div class="quality-menu" id="quality_menu_<?php echo $video['id']; ?>">
+                                        <button class="quality-btn active" onclick="changeQuality(<?php echo $video['id']; ?>, 'default', this)">Auto</button>
+                                        <button class="quality-btn" onclick="changeQuality(<?php echo $video['id']; ?>, 'hd1080', this)">1080p</button>
+                                        <button class="quality-btn" onclick="changeQuality(<?php echo $video['id']; ?>, 'hd720', this)">720p</button>
+                                        <button class="quality-btn" onclick="changeQuality(<?php echo $video['id']; ?>, 'large', this)">480p</button>
+                                        <button class="quality-btn" onclick="changeQuality(<?php echo $video['id']; ?>, 'medium', this)">360p</button>
+                                    </div>
+                                </div>
                                 
                                 <button class="control-btn" onclick="toggleFullscreen(<?php echo $video['id']; ?>)">
                                     <i class="bi bi-fullscreen"></i>
@@ -334,16 +416,13 @@ $completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
                         </div>
                         <div class="card-footer py-3 px-4 text-end border-0" id="video_footer_<?php echo $video['id']; ?>">
                             <?php if ($is_watched): ?>
-                                <button class="btn btn-sm btn-success rounded-pill px-4 disabled">
+                                <span class="badge bg-success py-2 px-3 rounded-pill text-white shadow-sm">
                                     <i class="bi bi-check-circle-fill me-1"></i> Completed
-                                </button>
+                                </span>
                             <?php else: ?>
-                                <form method="POST" class="d-inline" id="form_video_<?php echo $video['id']; ?>">
-                                    <input type="hidden" name="video_id" value="<?php echo $video['id']; ?>">
-                                    <button type="submit" name="mark_video_done" id="btn_video_<?php echo $video['id']; ?>" class="btn btn-sm btn-outline-primary rounded-pill px-4">
-                                        <i class="bi bi-check2 me-1"></i> Mark as Watched
-                                    </button>
-                                </form>
+                                <span class="badge bg-warning py-2 px-3 rounded-pill text-dark shadow-sm">
+                                    <i class="bi bi-clock-fill me-1"></i> Incomplete
+                                </span>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -413,6 +492,7 @@ $completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 <script>
     let players = {};
+    let maxWatchedTime = {};
     const lessonId = <?php echo $lesson_id; ?>;
 
     function onYouTubeIframeAPIReady() {
@@ -444,7 +524,12 @@ $completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
     function onPlayerReady(event, dbId) {
-        // Initial setup if needed
+        maxWatchedTime[dbId] = 0;
+        // Optionally, check if marked completed, then allow full seeking
+        const el = document.getElementById('player_' + dbId);
+        if (el.dataset.completed === '1') {
+            maxWatchedTime[dbId] = event.target.getDuration() || 999999;
+        }
     }
 
     function onPlayerStateChange(event, dbId) {
@@ -466,6 +551,10 @@ $completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
         const progressBar = document.getElementById('progress_bar_' + dbId);
         const cardEl = document.getElementById('video_card_' + dbId);
         
+        if (typeof maxWatchedTime[dbId] === 'undefined') {
+            maxWatchedTime[dbId] = 0;
+        }
+
         const interval = setInterval(() => {
             if (player.getPlayerState() !== YT.PlayerState.PLAYING) {
                 clearInterval(interval);
@@ -475,10 +564,26 @@ $completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
             const duration = player.getDuration();
             const currentTime = player.getCurrentTime();
             
+            // Update max watched time
+            // Allow larger jump tolerance for clicking the skip 10s button
+            if (currentTime > maxWatchedTime[dbId] && (currentTime - maxWatchedTime[dbId] <= 12)) {
+                maxWatchedTime[dbId] = currentTime;
+            } else if (currentTime > maxWatchedTime[dbId]) {
+                // If they bypassed somehow (e.g. hack/drag), revert them
+                player.seekTo(maxWatchedTime[dbId]);
+            }
+
             // Update Progress Bar
             if (duration > 0) {
-                const percent = (currentTime / duration) * 100;
-                progressBar.style.width = percent + '%';
+                let displayPercent = (currentTime / duration) * 100;
+                // Allow progress bar to also reflect max watched when dragging
+                progressBar.style.width = displayPercent + '%';
+            }
+
+            // Sync volume slider back
+            const volSlider = document.getElementById('volume_slider_' + dbId);
+            if (volSlider) {
+                volSlider.value = player.getVolume();
             }
 
             // Check if watched until the last 3 seconds
@@ -503,13 +608,51 @@ $completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
     function toggleMute(dbId) {
         const player = players[dbId];
         const muteIcon = document.getElementById('volume_icon_' + dbId);
+        const popSlider = document.getElementById('volume_slider_' + dbId);
+        
         if (player.isMuted()) {
             player.unMute();
             muteIcon.className = "bi bi-volume-up-fill";
+            if(popSlider) popSlider.value = player.getVolume();
         } else {
             player.mute();
             muteIcon.className = "bi bi-volume-mute-fill";
+            if(popSlider) popSlider.value = 0;
         }
+    }
+
+    function changeVolume(dbId, value) {
+        const player = players[dbId];
+        if (player.isMuted() && value > 0) {
+            player.unMute();
+        }
+        player.setVolume(value);
+        const icon = document.getElementById('volume_icon_' + dbId);
+        if (value == 0) icon.className = "bi bi-volume-mute-fill";
+        else if (value < 50) icon.className = "bi bi-volume-down-fill";
+        else icon.className = "bi bi-volume-up-fill";
+    }
+
+    function changeQuality(dbId, quality, btnEl) {
+        const player = players[dbId];
+        const currentTime = player.getCurrentTime();
+        const videoId = player.getVideoData().video_id;
+        
+        // Highlight active quality button
+        if (btnEl) {
+            const menu = document.getElementById('quality_menu_' + dbId);
+            if (menu) {
+                menu.querySelectorAll('.quality-btn').forEach(btn => btn.classList.remove('active'));
+            }
+            btnEl.classList.add('active');
+        }
+
+        // setPlaybackQuality is deprecated, so we force-reload the video at the current timestamp with the specified quality
+        player.loadVideoById({
+            videoId: videoId,
+            startSeconds: currentTime,
+            suggestedQuality: quality
+        });
     }
 
     function cycleSpeed(dbId) {
@@ -533,10 +676,32 @@ $completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
         const percent = x / width;
         const duration = player.getDuration();
         
-        // Optional: Block seeking forward if you want more security
-        // if (percent * duration > player.getCurrentTime()) return;
+        const seekTime = percent * duration;
+        const maxTime = maxWatchedTime[dbId];
+        
+        // Prevent seeking forward beyond max watched time
+        if (seekTime > maxTime) {
+            player.seekTo(maxTime);
+        } else {
+            player.seekTo(seekTime);
+        }
+    }
 
-        player.seekTo(percent * duration);
+    function skip(dbId, seconds) {
+        const player = players[dbId];
+        const currentTime = player.getCurrentTime();
+        let newTime = currentTime + seconds;
+        const duration = player.getDuration();
+        
+        if (newTime < 0) newTime = 0;
+        if (newTime > duration) newTime = duration;
+        
+        // Let them skip forward 10s smoothly, maxWatchedTime will adjust in tracking
+        if (seconds > 0) {
+            maxWatchedTime[dbId] = newTime;
+        }
+        
+        player.seekTo(newTime);
     }
 
     function toggleFullscreen(dbId) {
@@ -575,7 +740,7 @@ $completed_videos = $stmt->fetchAll(PDO::FETCH_COLUMN);
                 
                 const footer = document.getElementById('video_footer_' + dbId);
                 if (footer) {
-                    footer.innerHTML = `<button class="btn btn-sm btn-success rounded-pill px-4 disabled"><i class="bi bi-check-circle-fill me-1"></i> Completed</button>`;
+                    footer.innerHTML = `<span class="badge bg-success py-2 px-3 rounded-pill text-white shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Completed</span>`;
                 }
 
                 // If all videos completed, update Lesson UI

@@ -292,7 +292,7 @@ foreach ($class_types as $type) {
                         <span class="h3 fw-bold mb-0 text-success">Healthy</span>
                     </div>
                 </div>
-                <p class="text-muted small mb-0">Database connection and session management active. Version stable @ v2.3.</p>
+                <p class="text-muted small mb-0">Database connection and session management active. Version stable @ v5.5.</p>
             </div>
         </div>
     </div>

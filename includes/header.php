@@ -52,7 +52,7 @@ $prefix = $is_subfolder ? '../' : './';
             <div class="bg-primary p-2 rounded-3 me-2 shadow-sm">
                 <i class="bi bi-grid-fill text-white h5 mb-0"></i>
             </div>
-            <h4 class="mb-0 fw-bold">Nexus-LMS <span class="badge bg-info-subtle text-info fw-normal" style="font-size: 0.6rem;">v2.3</span></h4>
+            <h4 class="mb-0 fw-bold">Nexus-LMS <span class="badge bg-info-subtle text-info fw-normal" style="font-size: 0.6rem;">v5.5</span></h4>
         </div>
         <nav class="nav flex-column mb-auto">
             <?php if ($user_role === 'admin'): ?>
@@ -105,7 +105,7 @@ $prefix = $is_subfolder ? '../' : './';
     <!-- Offcanvas Sidebar for Mobile -->
     <div class="offcanvas offcanvas-start border-theme" tabindex="-1" id="sidebarOffcanvas" style="width: 280px;">
         <div class="offcanvas-header border-bottom border-theme border-opacity-25 p-4">
-            <h5 class="offcanvas-title fw-bold">Nexus-LMS <span class="badge bg-primary fs-7 px-2">v2.3</span></h5>
+            <h5 class="offcanvas-title fw-bold">Nexus-LMS <span class="badge bg-primary fs-7 px-2">v5.5</span></h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body p-0 py-3 d-flex flex-column h-100">
